@@ -108,6 +108,15 @@ class WC_Gateway_Adeptix extends WC_Payment_Gateway
             exit;
         }
 
+        // A live store has no notion of "test mode" of its own - a webhook carrying test_mode is
+        // never meant for it. Skipping it here (rather than trusting the event name alone) is what
+        // stops a sandbox API key's test payment from marking a real order paid when its order_ref
+        // happens to match one, since both rails deliver to this same URL regardless of mode.
+        if (!empty($event['test_mode'])) {
+            status_header(200);
+            exit;
+        }
+
         $order = $this->adeptix_find_order_by_ref($event['order_ref'] ?? null);
         if ($order === null) {
             status_header(200); // unknown order - already deleted, or not ours; ack anyway

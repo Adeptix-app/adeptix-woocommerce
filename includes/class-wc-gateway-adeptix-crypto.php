@@ -158,6 +158,12 @@ class WC_Gateway_Adeptix_Crypto extends WC_Payment_Gateway
             exit;
         }
 
+        // See class-wc-gateway-adeptix.php's handle_webhook for why test_mode is checked here too.
+        if (!empty($event['test_mode'])) {
+            status_header(200);
+            exit;
+        }
+
         $order = $this->adeptix_find_order_by_ref($event['order_ref'] ?? null);
         if ($order === null) {
             status_header(200);
